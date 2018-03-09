@@ -1,0 +1,6 @@
+.idea
+data/ql-frontend/node_modules/
+package-lock.json
+data/ql-frontend/dist/*
+.DS_Store
+docker-sync

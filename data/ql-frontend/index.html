@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	
+	<!-- Vue Core -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+	
+	<!-- Bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+		  integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+	
+	<!-- Paginator / wNumb -->
+	<script src="https://cdn.jsdelivr.net/npm/vue-carousel@0.6.9/dist/vue-carousel.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/wnumb/1.1.0/wNumb.min.js"></script>
+	
+	<!-- Bootstrap & Vue.js (CSS) -->
+	<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css"/>
+	<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css"/>
+	
+	
+	<!-- Bootstrap & Vue.js (JS) -->
+	<script src="//unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+	<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+	
+	<!-- Custom Assets -->
+	<script src="js/index.js"></script>
+	<link rel="stylesheet" href="css/style.css">
+	
+	<title>Vue.js fake e-shop</title>
+</head>
+<body>
+<div id="vue">
+	<div class="container">
+		<h1 class="my-4 text-center">Prodej firem - example Vue.js libary</h1>
+		
+		<hr>
+		<form class="row">
+			<div class="form-group search-form py-4 m-auto w-100">
+				<input type="text" class="form-control form-control w-100" placeholder="Vyhledejte podle názvu ..."
+					   v-model="search">
+			</div>
+		</form>
+		<hr>
+		
+		<h1 v-if="search" class="text-center">
+			Vyhledávám: {{ search }}
+		</h1>
+		
+		<span @click="search = ''" v-if="search" class="d-block text-center">
+			× Smazat
+		</span>
+		
+		<!-- List products -->
+		<div class="row">
+			<div class="col-3" v-for="item in filterArticle">
+				<div class="products p-2 mt-4 position-relative" @click="fetchModalData(1); showModal(); loader = true">
+					<img src="image/sample.jpg" class="img-fluid">
+					
+					<span class="badge badge-danger position-absolute sale">
+						-{{ item.sale.value | round }} %
+					</span>
+					
+					<h2 class="h6 mt-3 mb-1 text-center">
+						{{ item.name }}
+					</h2>
+					
+					<strong class="d-block text-center mt-2">
+						{{ item.price | price }}
+					</strong>
+					
+					<span class="d-block text-center text-brand mt-4 mb-2">
+						<span class="btn btn-primary">
+							Detail firmy
+						</span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-12 text-center my-4">
+			<span class="btn btn-primary" @click="getProducts(countProduct + 12); countProduct = (countProduct + 12 )">
+				Načíst další inzeráty
+			</span>
+		</div>
+	</div>
+	
+	
+	<!-- Show another -->
+	
+	<!-- Modal -->
+	<b-modal ref="productModal" title="Prodej firmy" hide-footer size="lg">
+		<div v-if="loader" class="loader">
+			<div class="spinner">
+				<div class="double-bounce1"></div>
+				<div class="double-bounce2"></div>
+			</div>
+		</div>
+		
+		<div v-show="showForm">
+			<p>Nabízíme k prodeji firmu <strong>{{ modal.name }}</strong>
+				za neuvěřitelných <strong>{{ modal.price | price }}</strong>. </p>
+			
+			<div class="row mb-2 mt-5">
+				<div class="col-3">
+					<span class="btn btn-secondary" @click="fetchModalData(2); loader = true">
+						Přechozí
+					</span>
+				</div>
+				
+				<div class="col-6 text-center">
+					<button class="btn btn-success" @click="showForm = false">
+						Mám zájem o tuto firmu
+					</button>
+				</div>
+				
+				<div class="col-3 text-right">
+					<span class="btn btn-secondary" @click="fetchModalData(3); loader = true">
+						Následující
+					</span>
+				</div>
+			</div>
+			
+			<b-tabs class="mt-5">
+				<b-tab title="Podobné firmy" active>
+					<div class="row">
+						<div class="col-4" v-for="product in productsRandom">
+							<div class="p-2 mt-4 position-relative"
+								 @click="fetchModalData(1); showModal(); loader = true">
+								<img src="image/sample.jpg" class="img-fluid">
+								
+								<span class="badge badge-danger position-absolute sale">
+									-{{ product.sale.value | round }} %
+								</span>
+								
+								<h2 class="h6 mt-3 mb-1 text-center">
+									{{ product.name }}
+								</h2>
+								
+								<strong class="d-block text-center mt-2">
+									{{ product.price | price }}
+								</strong>
+								
+								
+								<span class="d-block text-center text-brand mt-2 mb-2">
+									<span class="btn btn-primary">
+										Detail firmy
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</b-tab>
+				<b-tab title="Hodnocení">
+					<div v-for="rate in modal.ratings">
+						<div class="py-3">
+							<strong class="d-block mt-1 mb-2">
+								{{ rate.name }}
+							</strong>
+							
+							
+							<span class="d-block mt-1 mb-1">
+									{{ rate.comment }}
+								</span>
+							
+							<div class="rating">
+								<div class="rating-on rating-1" v-if="rate.rating == 1"></div>
+								<div class="rating-on rating-2" v-if="rate.rating == 2"></div>
+								<div class="rating-on rating-3" v-if="rate.rating == 3"></div>
+								<div class="rating-on rating-4" v-if="rate.rating == 4"></div>
+								<div class="rating-on rating-5" v-if="rate.rating == 5"></div>
+							</div>
+						</div>
+						<hr>
+					</div>
+				</b-tab>
+			</b-tabs>
+		</div>
+		
+		<div v-show="!showForm">
+			<form>
+				<div class="form-group">
+					<input type="text" class="form-control" name="" value="" placeholder="Jméno">
+				</div>
+				<div class="form-group">
+					<input type="email" class="form-control" name="" value="" placeholder="E-mail">
+				</div>
+				<div class="form-group">
+					<input type="tel" class="form-control" name="" value="" placeholder="Telefon">
+				</div>
+				<div class="form-group">
+					<textarea class="form-control" name="" rows="3" placeholder="Zpráva pro nás ..."></textarea>
+				</div>
+				<button class="btn btn-success" type="submit" name="button">
+					Odeslat
+				</button>
+			</form>
+			
+			<div class="text-center">
+				<button class="btn btn-danger" @click="showForm = true">
+					Nemám zájem, děkuji
+				</button>
+			</div>
+		</div>
+	</b-modal>
+</div>
+</body>
+</html>
+
+

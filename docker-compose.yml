@@ -1,0 +1,17 @@
+version: '2'
+services:
+  ql-backend:
+    build: ./docker/ql-backend
+    ports:
+      - '17010:80'
+    volumes:
+      - './data/ql-backend:/var/www/html'
+      - './docker/ql-backend/000-default.conf:/etc/apache2/sites-enabled/000-default.conf'
+  ql-frontend:
+    image: nginx:latest
+    links:
+      - ql-backend
+    volumes:
+      - './data/ql-frontend:/usr/share/nginx/html'
+    ports:
+      - '17011:80'
